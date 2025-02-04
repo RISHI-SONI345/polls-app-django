@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework_simplejwt',
+    'rest_framework',
     'polls.apps.PollConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -81,6 +83,32 @@ DATABASES = {
     }
 }
 
+from datetime import timedelta
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # ✅ JWT Authentication
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',  # ✅ Sirf authenticated users API access kar sakein
+    ],
+      'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',  # ✅ Har user ke liye limit
+        'rest_framework.throttling.AnonRateThrottle',  # ✅ Anonymous users ke liye limit
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '500/minute',  # ✅ Har user max 10 requests per minute
+        'anon': '5/minute',   # ✅ Anonymous users ke liye max 5 requests per minute
+    },
+        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 3,  # ✅ Har page me 5 records dikhai denge
+
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),  # ✅ Token 30 min tak valid rahega
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # ✅ Refresh token ek din tak valid rahega
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

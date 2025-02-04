@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Paginated Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #question-list {
+            list-style: none;
+            padding: 0;
+        }
+        #question-list li {
+            background: white;
+            padding: 15px;
+            margin: 10px auto;
+            width: 60%;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        #pagination {
+            margin-top: 20px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script>
+        const JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzM4NzAzMDg4LCJpYXQiOjE3Mzg3MDEyODgsImp0aSI6IjRkYmNhOTliY2YyOTQ4NTZhYzQ4MzNmOTQ2NmU1MWY3IiwidXNlcl9pZCI6MX0.ALUDdxNqyHMyyE6wMsbBsI8ZCQl_UNUptH9AvQE9TDk";  
+
+        async function fetchQuestions(page = 1) {
+            const response = await fetch(`/polls/api/questions/?page=${page}`, {
+                headers: {
+                    "Authorization": `Bearer ${JWT_TOKEN}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (response.status === 401) {
+                alert("Unauthorized! Check your token.");
+                return;
+            }
+
+            const data = await response.json();
+            showQuestions(data);
+        }
+
+        function showQuestions(data) {
+            let questionList = document.getElementById('question-list');
+            questionList.innerHTML = "";
+
+            data.results.forEach(question => {
+                let li = document.createElement("li");
+                li.innerText = `${question.question_text} - ${question.pub_date}`;
+                questionList.appendChild(li);
+            });
+
+            let pagination = document.getElementById('pagination');
+            pagination.innerHTML = "";
+
+            if (data.previous) {
+                let prevButton = document.createElement("button");
+                prevButton.innerText = "Previous";
+                prevButton.onclick = () => fetchQuestions(new URL(data.previous).searchParams.get("page"));
+                pagination.appendChild(prevButton);
+            }
+
+            if (data.next) {
+                let nextButton = document.createElement("button");
+                nextButton.innerText = "Next";
+                nextButton.onclick = () => fetchQuestions(new URL(data.next).searchParams.get("page"));
+                pagination.appendChild(nextButton);
+            }
+        }
+
+        window.onload = () => fetchQuestions();
+    </script>
+</head>
+<body>
+    <h1>Paginated Questions</h1>
+    <ul id="question-list"></ul>
+    <div id="pagination"></div>
+</body>
+</html>
